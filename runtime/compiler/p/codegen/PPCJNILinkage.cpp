@@ -637,7 +637,7 @@ void TR::PPCJNILinkage::releaseVMAccess(TR::Node* callNode, TR::RegisterDependen
    cg()->loadAddressConstantFixed(callNode, aValue, tempReg0, NULL, NULL, -1, false);
    generateTrg1Src1ImmInstruction(cg(), TR::InstOpCode::addi2, callNode, gr28Reg, metaReg,
                                               fej9->thisThreadGetPublicFlagsOffset());
-   generateInstruction(cg(), TR::InstOpCode::lwsync, callNode); // This is necessary for the fast path but redundant for the slow path
+   generateInstruction(cg(), TR::InstOpCode::sync, callNode); // This is necessary for the fast path but redundant for the slow path
    TR::LabelSymbol *loopHead = generateLabelSymbol(cg());
    generateLabelInstruction(cg(), TR::InstOpCode::label, callNode, loopHead);
    generateTrg1MemInstruction(cg(),TR::InstOpCode::Op_larx, callNode, tempReg2, new (trHeapMemory()) TR::MemoryReference(NULL, gr28Reg, TR::Compiler->om.sizeofReferenceAddress(), cg()));
@@ -723,7 +723,7 @@ void TR::PPCJNILinkage::releaseVMAccessAtomicFree(TR::Node* callNode, TR::Regist
    TR_J9VMBase *fej9 = (TR_J9VMBase *)fe();
 
 #if !defined(J9VM_INTERP_ATOMIC_FREE_JNI_USES_FLUSH)
-   generateInstruction(cg(), TR::InstOpCode::lwsync, callNode);
+   generateInstruction(cg(), TR::InstOpCode::sync, callNode);
 #endif /* !J9VM_INTERP_ATOMIC_FREE_JNI_USES_FLUSH */
    generateTrg1ImmInstruction(cg(), TR::InstOpCode::li, callNode, tempReg1, 1);
    generateMemSrc1Instruction(cg(), TR::InstOpCode::Op_st, callNode, new (trHeapMemory()) TR::MemoryReference(metaReg, (int32_t)offsetof(struct J9VMThread, inNative), TR::Compiler->om.sizeofReferenceAddress(), cg()), tempReg1);

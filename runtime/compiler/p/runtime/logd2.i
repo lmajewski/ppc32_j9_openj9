@@ -105,7 +105,7 @@ extern "builtin" unsigned int __load4r(unsigned int *);
 extern "builtin" unsigned long long __load8r(unsigned long long *);
 
 extern "builtin" double __log (double);
-extern "builtin" void __lwsync(void);
+extern "builtin" void __sync(void);
  
 extern "builtin" void __mem_delay(const void *, const unsigned int);
 extern "builtin" unsigned long __mfdcr(int);

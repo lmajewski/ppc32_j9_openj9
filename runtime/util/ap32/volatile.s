@@ -174,7 +174,7 @@ TOC.longVolatileWrite: .tc .longVolatileWrite[tc],longVolatileWrite[ds]
         stw r6,0(r3)
         stw r0,4(r3)
 # Lay down write barrier (also break apart stw stw lfd dispatch group)
-        lwsync
+        sync
         lfd fp3,0(r3)
         stfd fp3,0(r4)
 # Lay down read-write barrier

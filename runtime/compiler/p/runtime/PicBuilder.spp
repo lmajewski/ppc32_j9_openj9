@@ -39,8 +39,6 @@
 	.set isync_low,                  0x012c
 	.set sync_high,                  0x7c00                 ! Encoding for sync instruction
 	.set sync_low,                   0x04ac
-	.set lwsync_high,                0x7c20                 ! Encoding for lwsync instruction
-	.set lwsync_low,                 0x04ac
 	.set nop_high,                   0x6000                 ! Encoding for nop
 	.set addi_r3_high,               0x386b                 ! Encoding for addi r3,r11,0
 	.set add_r3_high,		 0x7c60	                ! Encoding for add r3, ra, rb
@@ -610,7 +608,7 @@ _interpreterUnresolvedInstanceDataGlue:
 	lis	r3, nop_high
 	beq	cr0, .L.isyncPatching
 	add	r9, r6, r5
-	stw	r3, 0(r9)					! patch the lwsync
+	stw	r3, 0(r9)					! patch the sync
 	bl	.__code_synchronization
 	andis.	r4, r29, IS_PsuedoTOC
 	addi	r9, r9, 8
@@ -1545,12 +1543,12 @@ MTUnresolvedInt32Store:
     bne	cr0, .MTUnresolvedInt32StoreNoneIsolated		! Not isolated, branch to none isolated case
 
     MT_ComputeStaticFieldAddress(J9TR_VMThread_tenantData32, 2)
-    lwsync
+    sync
     stwx   r29, r3, r5                               ! r29 contains store value
     sync
     b .MTUnresolvedInt32StoreRestore
 .MTUnresolvedInt32StoreNoneIsolated:
-    lwsync
+    sync
     stw    r29, 0(r3)                               ! r29 contains store value
     sync
 .MTUnresolvedInt32StoreRestore:
@@ -1586,12 +1584,12 @@ MTUnresolvedInt64Store:
     bne	cr0, .MTUnresolvedInt64StoreNoneIsolated		! Not isolated, branch to none isolated case
 
     MT_ComputeStaticFieldAddress(J9TR_VMThread_tenantData64, 3)
-    lwsync
+    sync
     stdx   r29, r3, r5                               ! r29 contains store value
     sync
     b .MTUnresolvedInt64StoreRestore
 .MTUnresolvedInt64StoreNoneIsolated:
-    lwsync
+    sync
     std    r29, 0(r3)                               ! r29 contains store value
     sync
 .MTUnresolvedInt64StoreRestore:
@@ -1627,12 +1625,12 @@ MTUnresolvedFloatStore:
     bne	cr0, .MTUnresolvedFloatStoreNoneIsolated		! Not isolated, branch to none isolated case
 
     MT_ComputeStaticFieldAddress(J9TR_VMThread_tenantData32, 2)
-    lwsync
+    sync
     stfsx   fp0, r3, r5                               ! fp0 contains store value
     sync
     b .MTUnresolvedFloatStoreRestore
 .MTUnresolvedFloatStoreNoneIsolated:
-    lwsync
+    sync
     stfs   fp0, 0(r3)                               ! fp0 contains store value
     sync
 .MTUnresolvedFloatStoreRestore:
@@ -1667,12 +1665,12 @@ MTUnresolvedDoubleStore:
     bne	cr0, .MTUnresolvedDoubleStoreNoneIsolated		! Not isolated, branch to none isolated case
 
     MT_ComputeStaticFieldAddress(J9TR_VMThread_tenantData64, 3)
-    lwsync
+    sync
     stfdx   fp0, r3, r5                               ! fp0 contains store value
     sync
     b .MTUnresolvedDoubleStoreRestore
 .MTUnresolvedDoubleStoreNoneIsolated:
-    lwsync
+    sync
     stfd   fp0, 0(r3)                               ! fp0 contains store value
     sync
 .MTUnresolvedDoubleStoreRestore:
@@ -1712,13 +1710,13 @@ MTUnresolvedAddressStore:
     lwz    r4, 20(r7)                              ! get compressed shift size
     srd    r29, r29, r4                              ! compress poiter
 
-    lwsync
+    sync
     stwx   r29, r3, r5                               ! r29 contains store value
     sync
     std r5, 32(J9SP)                            ! update owning object, overwrite r4 slot
     b .MTUnresolvedObjStoreRestore
 .MTUnresolvedObjStoreNoneIsolated:
-    lwsync
+    sync
     std    r29, 0(r3)                               ! r29 contains store value, in ramstatic its not compressed
     sync
 .MTUnresolvedObjStoreRestore:

@@ -216,7 +216,7 @@ longVolatileWrite:
         stw r4,0(r3)
         stw r0,4(r3)
 # Lay down write barrier (also break apart stw stw lfd dispatch group)
-        lwsync
+        sync
         lfd fp3,0(r3)
         lwz r4,728(r1)                           # load inParm2
         stfd fp3,0(r4)

@@ -424,7 +424,7 @@ TR::Register *outlinedHelperWrtbarEvaluator(TR::Node *node, TR::CodeGenerator *c
       {
       memRef = new (cg->trHeapMemory()) TR::MemoryReference(node, TR::Compiler->om.sizeofReferenceAddress(), cg);
       if (needSync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       generateMemSrc1Instruction(cg,TR::InstOpCode::Op_st, node, memRef, srcObjectReg);
       if (needSync)
          {
@@ -970,7 +970,7 @@ TR::Register *J9::Power::TreeEvaluator::wrtbarEvaluator(TR::Node *node, TR::Code
       TR::MemoryReference *dstMR = new (cg->trHeapMemory()) TR::MemoryReference(destinationAddressRegister, 0, TR::Compiler->om.sizeofReferenceAddress(), cg);
 
       if (needSync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       generateMemSrc1Instruction(cg,TR::InstOpCode::Op_st, node, dstMR, sourceRegister);
 
@@ -989,7 +989,7 @@ TR::Register *J9::Power::TreeEvaluator::wrtbarEvaluator(TR::Node *node, TR::Code
       tempMR = new (cg->trHeapMemory()) TR::MemoryReference(node, TR::Compiler->om.sizeofReferenceAddress(), cg);
 
       if (needSync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       generateMemSrc1Instruction(cg,TR::InstOpCode::Op_st, node, tempMR, sourceRegister);
 
@@ -1127,7 +1127,7 @@ TR::Register *J9::Power::TreeEvaluator::iwrtbarEvaluator(TR::Node *node, TR::Cod
       TR::MemoryReference *dstMR = new (cg->trHeapMemory()) TR::MemoryReference(destinationAddressRegister, 0, TR::Compiler->om.sizeofReferenceAddress(), cg);
 
       if (needSync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       if (usingCompressedPointers)
          generateMemSrc1Instruction(cg, TR::InstOpCode::stw, node, dstMR, compressedReg);
@@ -1152,7 +1152,7 @@ TR::Register *J9::Power::TreeEvaluator::iwrtbarEvaluator(TR::Node *node, TR::Cod
       tempMR = new (cg->trHeapMemory()) TR::MemoryReference(node, sizeofMR, cg);
 
       if (needSync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       if (usingCompressedPointers)
          generateMemSrc1Instruction(cg, TR::InstOpCode::stw, node, tempMR, compressedReg);
@@ -3157,19 +3157,19 @@ TR::Register *J9::Power::TreeEvaluator::flushEvaluator(TR::Node *node, TR::CodeG
    if (opCode == TR::allocationFence)
       {
       if (!node->canOmitSync())
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       }
    else
       {
       if (opCode == TR::loadFence)
          {
          if (TR::Compiler->target.cpu.id() == TR_PPCp7)
-            generateInstruction(cg, TR::InstOpCode::lwsync, node);
+            generateInstruction(cg, TR::InstOpCode::sync, node);
          else
             generateInstruction(cg, TR::InstOpCode::isync, node);
          }
       else if (opCode == TR::storeFence)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       else if (opCode == TR::fullFence)
          {
          if (node->canOmitSync())
@@ -5194,7 +5194,7 @@ TR::Register *J9::Power::TreeEvaluator::VMmonexitEvaluator(TR::Node *node, TR::C
       // exiting from read monitors still needs lwsync
       // (ensures loads have completed before releasing lock)
       if (TR::Compiler->target.isSMP())
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       if (TR::Compiler->target.is64Bit() && !fej9->generateCompressedLockWord())
          opCode = TR::InstOpCode::std;
       else
@@ -5268,7 +5268,7 @@ TR::Register *J9::Power::TreeEvaluator::VMmonexitEvaluator(TR::Node *node, TR::C
       // exiting from read monitors still needs lwsync
       // (ensures loads have completed before releasing lock)
       if (TR::Compiler->target.isSMP())
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       generateDepLabelInstruction(cg, TR::InstOpCode::label, node, loopLabel, conditions);
       if (TR::Compiler->target.is64Bit() && !fej9->generateCompressedLockWord())
@@ -7503,7 +7503,7 @@ static bool simpleReadMonitor(TR::Node *node, TR::CodeGenerator *cg, TR::Node *o
       generateTrg1Src2Instruction(cg, TR::InstOpCode::OR, node, tempMR->getBaseRegister(), tempMR->getBaseRegister(), monitorReg);
       generateTrg1MemInstruction(cg, loadOpCode, node, loadResultReg, tempMR);
       if (needlwsync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       else
          generateTrg1Src2Instruction(cg, TR::InstOpCode::XOR, node, monitorReg, loadResultReg, loadResultReg);
       if (TR::Compiler->target.is64Bit() && !fej9->generateCompressedLockWord())
@@ -7519,7 +7519,7 @@ static bool simpleReadMonitor(TR::Node *node, TR::CodeGenerator *cg, TR::Node *o
       generateTrg1Src2Instruction(cg, TR::InstOpCode::OR, node, tempMR->getBaseRegister(), tempMR->getBaseRegister(), monitorReg);
       generateTrg1MemInstruction(cg, loadOpCode, node, loadResultReg, tempMR);
       if (needlwsync)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
       else
          generateTrg1Src2Instruction(cg, TR::InstOpCode::XOR, node, monitorReg, loadResultReg, loadResultReg);
       if (TR::Compiler->target.is64Bit() && !fej9->generateCompressedLockWord())
@@ -8326,7 +8326,7 @@ static TR::Register *genCAS(TR::Node *node, TR::CodeGenerator *cg, TR::Register 
 
    // Memory barrier --- NOTE: we should be able to do a test upfront to save this barrier,
    //                          but Hursley advised to be conservative due to lack of specification.
-   generateInstruction(cg, TR::InstOpCode::lwsync, node);
+   generateInstruction(cg, TR::InstOpCode::sync, node);
 
    TR::LabelSymbol *loopLabel = generateLabelSymbol(cg);
    generateLabelInstruction(cg, TR::InstOpCode::label, node, loopLabel);
@@ -9017,7 +9017,7 @@ static TR::Register *inlineAtomicOps(TR::Node *node, TR::CodeGenerator *cg, int8
 
    // Memory barrier --- NOTE: we should be able to do a test upfront to save this barrier,
    //                          but Hursley advised to be conservative due to lack of specification.
-   generateInstruction(cg, TR::InstOpCode::lwsync, node);
+   generateInstruction(cg, TR::InstOpCode::sync, node);
 
    TR::LabelSymbol *doneLabel = TR::LabelSymbol::create(cg->trHeapMemory(),cg);
    TR::LabelSymbol *loopLabel = TR::LabelSymbol::create(cg->trHeapMemory(),cg);
@@ -9591,7 +9591,7 @@ static TR::Register *inlineAtomicOperation(TR::Node *node, TR::CodeGenerator *cg
          }
 
       if (!isWeak)
-         generateInstruction(cg, TR::InstOpCode::lwsync, node);
+         generateInstruction(cg, TR::InstOpCode::sync, node);
 
       generateLabelInstruction(cg, TR::InstOpCode::label, node, startLabel);
 
@@ -12229,7 +12229,7 @@ J9::Power::CodeGenerator::inlineDirectCall(TR::Node *node, TR::Register *&result
             for (int32_t i = numArgs - 1; i >= 0; i--)
                cg->decReferenceCount(callNode->getChild(i));
             cg->decReferenceCount(callNode);
-            generateInstruction(cg, TR::InstOpCode::lwsync, node);
+            generateInstruction(cg, TR::InstOpCode::sync, node);
             resultReg = NULL;
             return true;
             }
